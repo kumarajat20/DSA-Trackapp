@@ -34,4 +34,4 @@ python app.py
 - Problem recommendations
 
 ## 👨‍💻 Author
-Rajat Yadav
+Rajat Kumar

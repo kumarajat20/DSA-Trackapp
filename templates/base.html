@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>DSA Tracker</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<!-- 🔥 NAVBAR -->
+<div class="navbar">
+  <h2>🚀 DSA Tracker</h2>
+
+  <div class="nav-links">
+    <a href="/dashboard">Dashboard</a>
+
+    {% if session.get('user_id') %}
+      <span class="username">👤 {{ session.get('username') }}</span>
+      <a href="/logout" class="logout">Logout</a>
+    {% else %}
+      <a href="/login">Login</a>
+    {% endif %}
+    <button onclick="toggleTheme()" class="theme-btn">🌙</button>
+  </div>
+</div>
+
+<!-- 🔥 PAGE CONTENT -->
+<div class="container">
+  {% block content %}{% endblock %}
+</div>
+<script>
+function toggleTheme() {
+  document.body.classList.toggle("light-mode");
+
+  // Save preference
+  if (document.body.classList.contains("light-mode")) {
+    localStorage.setItem("theme", "light");
+  } else {
+    localStorage.setItem("theme", "dark");
+  }
+}
+
+// Load saved theme
+window.onload = function() {
+  if (localStorage.getItem("theme") === "light") {
+    document.body.classList.add("light-mode");
+  }
+}
+</script>
+
+</body>
+</html>

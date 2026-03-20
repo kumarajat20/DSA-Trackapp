@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<h1>🚀 DSA Tracker Dashboard</h1>
+
+<h3>⚠️ Focus More On: {{ weak }}</h3>
+
+{% for t in topics %}
+
+<div class="topic-card">
+
+  <h2>
+    {{ t.name }}
+    {% if not t.unlocked %}
+      🔒
+    {% endif %}
+  </h2>
+
+  <!-- Progress Bar -->
+  <div class="progress-bar">
+    <div class="progress" style="width : {{ t.progress }}%;">
+      {{ t.progress }}%
+    </div>
+  </div>
+
+  {% if t.unlocked %}
+
+    <ul>
+      {% for p in t.problems %}
+        <li>
+          {{ p[1] }}
+
+         <a href="/mark/{{ p[0] }}">
+        {% if p[2] == 1 %}
+        ❌  Undo
+        {% else %}
+        ✅ Done
+        {% endif %}
+        </a>
+        </li>
+      {% endfor %}
+    </ul>
+
+  {% else %}
+
+    <p style="color: gray;">Complete previous topic to unlock 🔒</p>
+
+  {% endif %}
+
+</div>
+
+{% endfor %}
+
+</body>
+</html>

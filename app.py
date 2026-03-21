@@ -131,11 +131,22 @@ def dashboard():
 
     weak_topic = get_weak_topic()
     print("WEAK TOPIC:", weak_topic)
+    topic_names = []
+    topic_progress = []
 
+    for t in topic_data:
+        topic_names.append(t["name"])
+        topic_progress.append(t["progress"])
+        print("NAMES:", topic_names)
+        print("PROGRESS:", topic_progress)
     return render_template("dashboard.html",
                            topics=topic_data,
                            weak=weak_topic,
-                        streak = streak)
+                           streak = streak,
+                           topic_names= topic_names,
+                           topic_progress= topic_progress
+                        )
+    
 
 # mark done 
 @app.route('/mark/<int:id>')
@@ -246,5 +257,6 @@ def login():
 def logout():
     session.clear()
     return redirect('/login')
+
 if __name__ == "__main__":
     app.run(debug=True)

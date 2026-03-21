@@ -187,3 +187,10 @@ button:hover {
   text-align: center;
   font-size: 18px;
 }
+
+canvas {
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}

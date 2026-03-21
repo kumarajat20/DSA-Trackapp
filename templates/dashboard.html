@@ -3,87 +3,151 @@
 <head>
   <title>Dashboard</title>
   <link rel="stylesheet" href="/static/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <body>
 
-<h1>🚀 DSA Tracker Dashboard</h1>
+<div class="dashboard">
 
-<h3>⚠️ Focus More On: {{ weak }}</h3>
-<canvas id="progressChart" width="400" height="200"></canvas>
-{% for t in topics %}
-<div class="top-stats">
-  <div class="card">🔥 Streak: {{ streak }}</div>
-  <div class="card">⚠️ Weak Topic: {{ weak }}</div>
-  <div class="card">📊 Progress Coming Soon</div>
-</div>
+  <h1>🚀 DSA Tracker Dashboard</h1>
 
-<div class="topic-card">
-
-  <h2>
-    {{ t.name }}
-    {% if not t.unlocked %}
-      🔒
-    {% endif %}
-  </h2>
-
-  <!-- Progress Bar -->
-  <div class="progress-bar">
-    <div class="progress" style="width : {{ t.progress }}%;">
-      {{ t.progress }}%
-    </div>
+  <!-- 🔥 TOP SECTION -->
+  <div class="top-section">
+    <div class="card">🔥 Streak: {{ streak }}</div>
+    <div class="card">⚠️ Weak: {{ weak }}</div>
   </div>
 
-  {% if t.unlocked %}
+  
 
-    <ul>
-      {% for p in t.problems %}
+  <!-- 📦 TOPICS -->
+  <div class="topics">
+
+    {% for t in topics %}
+
+    <div class="topic-card">
+
+      <h2>
+        {{ t.name }}
+        {% if not t.unlocked %} 🔒 {% endif %}
+      </h2>
+
+      <!-- Progress Bar -->
+      <div class="progress-bar">
+        <div class="progress" 
+             style="width: {{ t.progress }}%;
+             background:
+             {% if t.progress < 40 %}red
+             {% elif t.progress < 80 %}orange
+             {% else %}green
+             {% endif %};">
+          {{ t.progress }}%
+        </div>
+      </div>
+
+      {% if t.unlocked %}
+
+      <ul>
+        {% for p in t.problems %}
         <li>
           {{ p[1] }}
 
-         <a href="/mark/{{ p[0] }}">
-        {% if p[2] == 1 %}
-        ❌  Undo
-        {% else %}
-        ✅ Done
-        {% endif %}
-        </a>
+          <a href="/mark/{{ p[0] }}">
+            {% if p[2] == 1 %}
+              ❌ Undo
+            {% else %}
+              ✅ Done
+            {% endif %}
+          </a>
         </li>
-      {% endfor %}
-    </ul>
+        {% endfor %}
+      </ul>
 
-  {% else %}
+      {% else %}
 
-    <p style="color: gray;">Complete previous topic to unlock 🔒</p>
+      <p style="color: gray;">Complete previous topic to unlock 🔒</p>
 
-  {% endif %}
+      {% endif %}
 
+    </div>
+
+    {% endfor %}
+
+  </div>
+  <!-- 📊 CHART -->
+   <div class="chart-header">
+    <h3>📊 Progress Analytics</h3>
+
+    <select id="chartType" onchange="updateChart()">
+      <option value="pie">Pie Chart</option>
+      <option value="bar">Bar Chart</option>
+  </select>
+  </div>
+  <div class="chart-box">
+    <canvas id="progressChart"></canvas>
+  </div>
 </div>
 
-{% endfor %}
+<!-- 📊 CHART SCRIPT -->
 <script>
-const ctx = document.getElementById('progressChart');
+const topicNames = {{ topic_names | tojson }};
+const topicProgress = {{ topic_progress | tojson }};
 
-new Chart(ctx, {
-    type: 'bar',
-    data: {
-        labels: {{ topic_names | tojson }},
-        datasets: [{
-            label: 'Progress %',
-            data: {{ topic_progress | tojson }},
-            borderWidth: 1
-        }]
-    },
-    options: {
-        scales: {
-            y: {
-                beginAtZero: true,
-                max: 100
-            }
-        }
+let chart; // global chart variable
+
+function createChart(type) {
+    const ctx = document.getElementById('progressChart').getContext('2d');
+
+    if (chart) {
+        chart.destroy(); // destroy previous chart
     }
-});
+
+    chart = new Chart(ctx, {
+        type: type,
+        data: {
+            labels: topicNames,
+            datasets: [{
+                label: 'Progress %',
+                data: topicProgress,
+                backgroundColor: [
+                    '#22c55e',
+                    '#3b82f6',
+                    '#f59e0b',
+                    '#ef4444',
+                    '#a855f7',
+                    '#14b8a6'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: type === 'pie',
+                    position: 'bottom'
+                }
+            },
+            scales: type === 'bar' ? {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            } : {}
+        }
+    });
+}
+
+function updateChart() {
+    const selectedType = document.getElementById('chartType').value;
+    createChart(selectedType);
+}
+
+// 🔥 Load default chart
+window.onload = function() {
+    createChart('pie');
+};
 </script>
+
 </body>
 </html>

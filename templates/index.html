@@ -1,17 +1,30 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>DSA Tracker</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-<h1>🚀 AI-Powered DSA Tracker</h1>
+{% block content %}
 
-<p>Follow a structured roadmap and track your progress</p>
+<div class="hero">
 
-<a href="/login">
-  <button>Start Learning</button>
-</a>
+  <!-- LEFT SIDE -->
+  <div class="hero-left">
+    <h1 class="animated-text">🚀 Master DSA Smartly</h1>
+    <p>
+      Track your progress, maintain streaks, and focus on weak topics with AI-powered insights.
+    </p>
+  </div>
 
-</body>
-</html>
+  <!-- RIGHT SIDE -->
+  <div class="hero-right">
+    <h2>Get Started</h2>
+
+    <a href="/login">
+      <button>Login</button>
+    </a>
+
+    <a href="/signup">
+      <button class="secondary">Signup</button>
+    </a>
+  </div>
+
+</div>
+
+{% endblock %}

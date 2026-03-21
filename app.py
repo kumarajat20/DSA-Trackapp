@@ -1,4 +1,5 @@
 from flask import session 
+from datetime import date, timedelta
 
 from flask import Flask, render_template, request, redirect
 import sqlite3
@@ -124,7 +125,8 @@ def dashboard():
 
     cur.execute("SELECT * FROM problems")
     print("PROBLEMS:", cur.fetchall())
-
+    cur.execute("SELECT streak FROM users WHERE id=?", (user_id,))
+    streak = cur.fetchone()[0]
     conn.close()
 
     weak_topic = get_weak_topic()
@@ -132,36 +134,66 @@ def dashboard():
 
     return render_template("dashboard.html",
                            topics=topic_data,
-                           weak=weak_topic)
+                           weak=weak_topic,
+                        streak = streak)
 
+# mark done 
 @app.route('/mark/<int:id>')
 def mark_done(id):
     if 'user_id' not in session:
         return redirect('/login')
 
-    # ✅ GET USER ID HERE
     user_id = session['user_id']
-
     conn = connect_db()
     cur = conn.cursor()
-    
+
     # Check if already marked
-    cur.execute("""SELECT * FROM 
-                progress WHERE problem_id = ? AND user_id = ? 
-                """, (id,user_id))
+    cur.execute("SELECT * FROM progress WHERE problem_id=? AND user_id=?", (id, user_id))
     existing = cur.fetchone()
 
     if existing:
-        # 🔄 UNMARK (delete)
-        cur.execute("DELETE FROM progress WHERE problem_id = ? AND user_id  ", (id, user_id))
+        # ❌ UNMARK
+        cur.execute("DELETE FROM progress WHERE problem_id=? AND user_id=?", (id, user_id))
+
     else:
         # ✅ MARK DONE
-        cur.execute("INSERT INTO progress (user_id, problem_id, status) VALUES (?, ?, 'done')", (user_id, id,))
+        cur.execute(
+            "INSERT INTO progress (user_id, problem_id, status) VALUES (?, ?, 'done')",
+            (user_id, id)
+        )
+
+        # 🔥 STREAK LOGIC STARTS HERE
+        cur.execute("SELECT streak, last_solved_date FROM users WHERE id=?", (user_id,))
+        data = cur.fetchone()
+
+        current_streak = data[0] if data[0] else 0
+        last_date = data[1]
+
+        today = date.today()
+
+        if last_date:
+            last_date = date.fromisoformat(last_date)
+        else:
+            last_date = None
+
+        if last_date == today:
+            pass  # already counted today
+        elif last_date == today - timedelta(days=1):
+            current_streak += 1
+        else:
+            current_streak = 1
+
+        cur.execute("""
+            UPDATE users 
+            SET streak=?, last_solved_date=? 
+            WHERE id=?
+        """, (current_streak, today.isoformat(), user_id))
 
     conn.commit()
     conn.close()
 
     return redirect('/dashboard')
+
 
 # SIGN UP ROUTE 
 @app.route('/signup', methods=['GET', 'POST'])
